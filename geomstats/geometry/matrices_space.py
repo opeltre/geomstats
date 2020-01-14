@@ -25,10 +25,34 @@ class MatricesSpace(EuclideanSpace):
     def belongs(self, point):
         """
         Check if point belongs to the Matrix space.
+
+        Parameters
+        ----------
+        point : array-like, shape=[n_samples, dim1, dim2]
+
+        Returns
+        -------
+        belongs : array-like boolean, shape=[n_samples]
         """
         point = gs.to_ndarray(point, to_ndim=3)
-        _, mat_dim_1, mat_dim_2 = point.shape
+        _, dim_1, dim_2 = point.shape
         return mat_dim_1 == self.m & mat_dim_2 == self.n
+
+    @staticmethod
+    def equal(a, b, tol=TOLERANCE):
+        """
+        Test if matrices a and b are close.
+
+        Parameters
+        ----------
+        a : array-like, shape=[n_samples, dim1, dim2]
+        b : array-like, shape=[n_samples, dim2, dim3]
+
+        Returns
+        -------
+        eq : array-like boolean, shape=[n_samples]
+        """
+        return gs.all(gs.isclose(a, b, atol=tol), (1, 2))
 
     @staticmethod
     def mult(a, b):
@@ -42,7 +66,7 @@ class MatricesSpace(EuclideanSpace):
 
         Returns
         -------
-        c : array-like, shape=[n_samples, dim1, dim3]
+        product : array-like, shape=[n_samples, dim1, dim3]
         """
         return gs.matmul(a, b)
 
@@ -59,7 +83,7 @@ class MatricesSpace(EuclideanSpace):
 
         Returns
         -------
-        c : array-like, shape=[n_samples, dim, dim]
+        bracket : array-like, shape=[n_samples, dim, dim]
         """
         return gs.matmul(a, b) - gs.matmul(b, a)
 
@@ -73,19 +97,23 @@ class MatricesSpace(EuclideanSpace):
         return gs.reshape(matrix, (n_mats, m*n))
 
     @staticmethod
-    def is_symmetric(matrix, tolerance=TOLERANCE):
-        """Check if a matrix is symmetric."""
-        matrix = gs.to_ndarray(matrix, to_ndim=3)
-        n_mats, m, n = matrix.shape
+    def is_symmetric(a, tol=TOLERANCE):
+        """
+        Check if a matrix is symmetric.
+
+        Parameters
+        ----------
+        a : array-like, shape=[n_samples, dim, dim]
+        
+        Returns
+        -------
+        sym : array-like boolean, shape=[n_samples]
+        """
+        a = gs.to_ndarray(a, to_ndim=3)
+        _, m, n = matrix.shape
         assert m == n
-        matrix_transpose = gs.transpose(matrix, axes=(0, 2, 1))
-
-        mask = gs.isclose(matrix, matrix_transpose, atol=tolerance)
-        mask = gs.all(mask, axis=(1, 2))
-
-#        mask = gs.to_ndarray(mask, to_ndim=1)
-#        mask = gs.to_ndarray(mask, to_ndim=2, axis=1)
-        return mask
+        Ta = gs.transpose(a, axes=(0, 2, 1))
+        return self.equal(a, Ta, tol)
 
     @staticmethod
     def make_symmetric(matrix):
