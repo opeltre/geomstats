@@ -110,10 +110,8 @@ class MatricesSpace(EuclideanSpace):
         sym : array-like boolean, shape=[n_samples]
         """
         a = gs.to_ndarray(a, to_ndim=3)
-        _, m, n = matrix.shape
-        assert m == n
         Ta = gs.transpose(a, axes=(0, 2, 1))
-        return self.equal(a, Ta, tol)
+        return MatricesSpace.equal(a, Ta, tol)
 
     @staticmethod
     def make_symmetric(matrix):
