@@ -28,11 +28,29 @@ class Matrices(EuclideanSpace):
         point = gs.to_ndarray(point, to_ndim=3)
         _, mat_dim_1, mat_dim_2 = point.shape
         return mat_dim_1 == self.m & mat_dim_2 == self.n
+    
+    @staticmethod
+    def equal(a, b, atol=TOLERANCE):
+        """
+        Test if matrices a and b are close.
+
+        Parameters
+        ----------
+        a : array-like, shape=[n_samples, dim1, dim2]
+        b : array-like, shape=[n_samples, dim2, dim3]
+
+        Returns
+        -------
+        eq : array-like boolean, shape=[n_samples]
+        """
+        is_vectorized = (gs.ndim(gs.array(mat)) == 3)
+        axes = (1, 2) if is_vectorized else (0, 1)
+        return gs.all(gs.isclose(a, b, atol=tol), axes))
 
     @staticmethod
     def mul(*args):
         """
-        Return the product of matrices a and b.
+        Return the product of matrices a1, ..., an.
 
         Parameters
         ----------
@@ -77,17 +95,39 @@ class Matrices(EuclideanSpace):
         -------
         transpose : array-like, shape=[n_samples, dim, dim]
         """
-        is_vec = (gs.ndim(gs.array(mat)) == 3)
-        axes = (0, 2, 1) if is_vec else (1, 0)
+        is_vectorized = (gs.ndim(gs.array(mat)) == 3)
+        axes = (0, 2, 1) if is_vectorized else (1, 0)
         return gs.transpose(mat, axes)
 
     @classmethod
     def is_symmetric(cls, mat, atol=TOLERANCE):
-        """Check if a matrix is symmetric."""
-        return cls.equal(mat, cls.transpose(mat))
+        """
+        Check if a matrix is symmetric.
+        
+        Parameters
+        ----------
+        mat : array-like, shape=[n_samples, n, n]
+        atol : float, absolute tolerance. defaults to TOLERANCE
+
+        Returns
+        -------
+        is_sym : array-like boolean, shape=[n_samples]
+        """
+        return cls.equal(mat, cls.transpose(mat), atol)
 
     @classmethod
     def make_symmetric(cls, mat):
+        """
+        Make a matrix symmetric, by averaging with its transpose.
+
+        Parameters
+        ----------
+        mat : array-like, shape=[n_samples, n, n]
+        
+        Returns
+        -------
+        sym : array-like, shape=[n_samples, n, n]
+        """
         return 1/2 * (mat + cls.transpose(mat))
 
     @staticmethod
