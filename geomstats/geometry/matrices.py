@@ -3,6 +3,7 @@ The space of matrices (m, n), which is the Euclidean space R^{mn}.
 """
 
 import geomstats.backend as gs
+from functools import reduce
 from geomstats.geometry.euclidean_space import EuclideanSpace
 from geomstats.geometry.riemannian_metric import RiemannianMetric
 
@@ -43,9 +44,10 @@ class Matrices(EuclideanSpace):
         -------
         eq : array-like boolean, shape=[n_samples]
         """
-        is_vectorized = (gs.ndim(gs.array(mat)) == 3)
+        is_vectorized = (gs.ndim(gs.array(a)) == 3)\
+                or (gs.ndim(gs.array(b)) == 3)
         axes = (1, 2) if is_vectorized else (0, 1)
-        return gs.all(gs.isclose(a, b, atol=tol), axes)
+        return gs.all(gs.isclose(a, b, atol=atol), axes)
 
     @staticmethod
     def mul(*args):
@@ -63,7 +65,7 @@ class Matrices(EuclideanSpace):
         -------
         mul : array-like, shape=[n_samples, dim_1, dim_n]
         """
-        return args.reduce(gs.matmul)
+        return reduce(gs.matmul, args)
 
     @classmethod
     def commutator(cls, a, b):
