@@ -45,7 +45,7 @@ class Matrices(EuclideanSpace):
         """
         is_vectorized = (gs.ndim(gs.array(mat)) == 3)
         axes = (1, 2) if is_vectorized else (0, 1)
-        return gs.all(gs.isclose(a, b, atol=tol), axes))
+        return gs.all(gs.isclose(a, b, atol=tol), axes)
 
     @staticmethod
     def mul(*args):
