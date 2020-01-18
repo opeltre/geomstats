@@ -1,13 +1,13 @@
 """Affine connections."""
 
-import autograd
 from scipy.optimize import minimize
+from autograd import jacobian
+from autograd import elementwise_grad as egrad
 
 import geomstats.backend as gs
 
 
 N_STEPS = 10
-
 
 class Connection(object):
     """TODO: Define class here."""
@@ -109,7 +109,7 @@ class Connection(object):
             loss = 1 / self.dimension * gs.sum(delta ** 2, axis=1)
             return 1 / n_samples * gs.sum(loss)
 
-        objective_grad = autograd.elementwise_grad(objective)
+        objective_grad = egrad(objective)
 
         def objective_with_grad(vel):
             return objective(vel), objective_grad(vel)
@@ -413,7 +413,7 @@ class LeviCivitaConnection(Connection):
         base_point: array-like, shape=[n_samples, dimension]
                                 or shape=[1, dimension]
         """
-        metric_derivative = autograd.jacobian(self.metric_matrix)
+        metric_derivative = jacobian(self.metric_matrix)
         return metric_derivative(base_point)
 
     def christoffels(self, base_point):
